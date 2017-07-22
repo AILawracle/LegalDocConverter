@@ -9,7 +9,7 @@ namespace LegalDocConverter
     class convertSystem
     {
         /// <summary>
-        /// 
+        /// The main function for convertSystem
         /// </summary>
         /// <param name="input"></param>
         /// <param name="output"></param>
@@ -62,7 +62,7 @@ namespace LegalDocConverter
 
 
         /// <summary>
-        /// make a copy of the template to dest
+        /// Make a copy of the template to dest
         /// </summary>
         /// <param name="source"></param>
         /// <param name="dest"></param>
