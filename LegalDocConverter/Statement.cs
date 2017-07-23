@@ -20,7 +20,7 @@ namespace LegalDocConverter
         }
 
         /// <summary>
-        /// Replace all the parts that match with the fileds of  {the Statement.
+        /// Replace all the parts that match with the fileds of the Statement.
         /// </summary>
         /// <param name="output"></param>
         public void SearchAndReplace(string output)
@@ -42,10 +42,7 @@ namespace LegalDocConverter
                 }
                
 
-                regexText = new Regex(@"&lt;time&gt;");
-                DateTime localDate = DateTime.Now;
-                string time = localDate.ToString("dd-MMMM-yyyy");
-                docText = regexText.Replace(docText, time);
+                
 
                 using (StreamWriter sw = new StreamWriter(wordDoc.MainDocumentPart.GetStream(FileMode.Create)))
                 {

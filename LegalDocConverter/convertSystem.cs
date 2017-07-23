@@ -64,6 +64,10 @@ namespace LegalDocConverter
                 string email = Regex.Match(text, expr).Groups[1].Value;
                 dict.Add("email", email);
 
+                DateTime localDate = DateTime.Now;
+                string time = localDate.ToString("dd-MMMM-yyyy");
+                dict.Add("time", time);
+
                 return (new Statement(dict));
             }
 
