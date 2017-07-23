@@ -31,15 +31,15 @@ namespace LegalDocConverter
 
         private void button1_Click(object sender, EventArgs e)
         {
-            try
-            {
+            //try
+            //{
                 converter.convert(inputBox.Text, outputBox.Text, templateBox.Text);
                 MessageBox.Show("Document converted!");
-            }
-            catch
+            //}
+            /*catch
             {
                 MessageBox.Show("Error, incorrect path, try again.");
-            }
+            }*/
 
 
         }

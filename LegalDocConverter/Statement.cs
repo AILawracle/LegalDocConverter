@@ -11,25 +11,16 @@ namespace LegalDocConverter
 {
     class Statement
     {
-        private string plantiff;
-        private string defendant;
-        private string representative;
-        private string contact;
-        private string phone;
-        private string email;
+        Dictionary<string, string> dict;
 
-        public Statement(string plantiff, string defendant, string representative, string contact, string phone, string email)
+        public Statement(Dictionary<string, string> dict)
         {
-            this.plantiff = plantiff;
-            this.defendant = defendant;
-            this.representative = representative;
-            this.contact = contact;
-            this.phone = phone;
-            this.email = email;
+            this.dict = new Dictionary<string, string>(dict);
+            
         }
 
         /// <summary>
-        /// Replace all the parts that match with the fileds of the Statement.
+        /// Replace all the parts that match with the fileds of  {the Statement.
         /// </summary>
         /// <param name="output"></param>
         public void SearchAndReplace(string output)
@@ -37,28 +28,19 @@ namespace LegalDocConverter
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(output, true))
             {
                 string docText = null;
+                Regex regexText;
+
                 using (StreamReader sr = new StreamReader(wordDoc.MainDocumentPart.GetStream()))
                 {
                     docText = sr.ReadToEnd();
                 }
 
-                Regex regexText = new Regex(@"&lt;plaintiff&gt;");
-                docText = regexText.Replace(docText, this.plantiff);
-
-                regexText = new Regex(@"&lt;defendant&gt;");
-                docText = regexText.Replace(docText, this.defendant);
-
-                regexText = new Regex(@"&lt;representitive&gt;");
-                docText = regexText.Replace(docText, this.representative);
-
-                regexText = new Regex(@"&lt;contact&gt;");
-                docText = regexText.Replace(docText, this.contact);
-
-                regexText = new Regex(@"&lt;email&gt;");
-                docText = regexText.Replace(docText, this.email);
-
-                regexText = new Regex(@"&lt;phone&gt;");
-                docText = regexText.Replace(docText, this.phone);
+                foreach (KeyValuePair<string, string> kvp in dict)
+                {
+                    regexText = new Regex(@"&lt;" + kvp.Key + @"&gt;");
+                    docText = regexText.Replace(docText, kvp.Value);
+                }
+               
 
                 regexText = new Regex(@"&lt;time&gt;");
                 DateTime localDate = DateTime.Now;
@@ -72,10 +54,5 @@ namespace LegalDocConverter
             }
         }
 
-        public override string ToString()
-        {
-            return "plantiff: " + plantiff + "\ndefendant: " + defendant + "\nrepresentative: " + representative + "\ncontact: "
-                + contact + "\nphone: " + phone + "\nemail: " + email;
-        }
     }
 }

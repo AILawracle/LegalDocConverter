@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace LegalDocConverter
 {
@@ -35,27 +36,35 @@ namespace LegalDocConverter
 
                 // Assign a reference to the existing document body.
                 Body body = wordprocessingDocument.MainDocumentPart.Document.Body;
-                string text = body.InnerText;
 
+                Dictionary<string, string> dict = new Dictionary<string, string>();
+
+                string text = body.InnerText;
 
                 string expr = @"Plaintiff(.*)Defendant";
                 string plaintiff = Regex.Match(text, expr).Groups[1].Value;
+                dict.Add("plaintiff", plaintiff);
 
                 expr = @"Defendant(.*)FILING DETAILS";
                 string defendant = Regex.Match(text, expr).Groups[1].Value;
+                dict.Add("defendant", defendant);
 
 
                 expr = @"Legal Representative([\w\s]*).*Legal representative reference";
                 string representivie = Regex.Match(text, expr).Groups[1].Value;
+                dict.Add("representitive", representivie);
 
                 expr = @"Contact name and telephone(.*),.*?(\+?(\d[\d-. ]+)?(\([\d-. ]+\))?[\d-. ]+\d)Contact email";
                 string contact = Regex.Match(text, expr).Groups[1].Value;
                 string phone = Regex.Match(text, expr).Groups[2].Value;
+                dict.Add("contact", contact);
+                dict.Add("phone", phone);
 
                 expr = @"Contact email(.*)TYPE OF CLAIM";
                 string email = Regex.Match(text, expr).Groups[1].Value;
+                dict.Add("email", email);
 
-                return (new Statement(plaintiff, defendant, representivie, contact, phone, email));
+                return (new Statement(dict));
             }
 
         }
