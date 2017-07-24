@@ -37,12 +37,9 @@ namespace LegalDocConverter
 
                 foreach (KeyValuePair<string, string> kvp in dict)
                 {
-                    regexText = new Regex(@"&lt;" + kvp.Key + @"&gt;");
+                    regexText = new Regex(@"&lt;" + kvp.Key.ToLower() + @"&gt;");
                     docText = regexText.Replace(docText, kvp.Value);
                 }
-               
-
-                
 
                 using (StreamWriter sw = new StreamWriter(wordDoc.MainDocumentPart.GetStream(FileMode.Create)))
                 {

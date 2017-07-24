@@ -4,11 +4,18 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
 
 namespace LegalDocConverter
 {
     class convertSystem
     {
+
+
+       private Dictionary<string, string> dict = new Dictionary<string, string>();
+
         /// <summary>
         /// The main function for convertSystem
         /// </summary>
@@ -35,34 +42,23 @@ namespace LegalDocConverter
             {
 
                 // Assign a reference to the existing document body.
-                Body body = wordprocessingDocument.MainDocumentPart.Document.Body;
+                OpenXmlElement body = wordprocessingDocument.MainDocumentPart.Document.Body;
 
-                Dictionary<string, string> dict = new Dictionary<string, string>();
+                string text = ReadWordDocument(body);
 
-                string text = body.InnerText;
+                matchInfo("Plaintiff", text);
+                matchInfo("Defendant", text);
+                matchInfo("email", text);
 
-                string expr = @"Plaintiff(.*)Defendant";
-                string plaintiff = Regex.Match(text, expr).Groups[1].Value;
-                dict.Add("plaintiff", plaintiff);
+                string expr = "Legal Representative" + Environment.NewLine + Environment.NewLine + @"([\w\s]*).*" + Environment.NewLine;
+                string value = Regex.Match(text, expr, RegexOptions.Multiline).Groups[1].Value;
+                dict.Add("representitive", value);
 
-                expr = @"Defendant(.*)FILING DETAILS";
-                string defendant = Regex.Match(text, expr).Groups[1].Value;
-                dict.Add("defendant", defendant);
-
-
-                expr = @"Legal Representative([\w\s]*).*Legal representative reference";
-                string representivie = Regex.Match(text, expr).Groups[1].Value;
-                dict.Add("representitive", representivie);
-
-                expr = @"Contact name and telephone(.*),.*?(\+?(\d[\d-. ]+)?(\([\d-. ]+\))?[\d-. ]+\d)Contact email";
-                string contact = Regex.Match(text, expr).Groups[1].Value;
-                string phone = Regex.Match(text, expr).Groups[2].Value;
-                dict.Add("contact", contact);
-                dict.Add("phone", phone);
-
-                expr = @"Contact email(.*)TYPE OF CLAIM";
-                string email = Regex.Match(text, expr).Groups[1].Value;
-                dict.Add("email", email);
+                expr = "Contact name and telephone" + Environment.NewLine + Environment.NewLine + @"(.*),.*?(\+?(\d[\d-. ]+)?(\([\d-. ]+\))?[\d-. ]+\d)" + Environment.NewLine;
+                value = Regex.Match(text, expr, RegexOptions.Multiline).Groups[1].Value;
+                dict.Add("Contact", value);
+                value = Regex.Match(text, expr, RegexOptions.Multiline).Groups[2].Value;
+                dict.Add("phone", value);
 
                 DateTime localDate = DateTime.Now;
                 string time = localDate.ToString("dd-MMMM-yyyy");
@@ -91,5 +87,71 @@ namespace LegalDocConverter
             }
         }
 
+        /// <summary> 
+        ///  Read Plain Text in all XmlElements of word document 
+        /// </summary> 
+        /// <param name="element">XmlElement in document</param> 
+        /// <returns>Plain Text in XmlElement</returns> 
+        public string GetPlainText(OpenXmlElement body)
+        {
+            StringBuilder PlainTextInWord = new StringBuilder();
+            foreach (OpenXmlElement section in body.Elements())
+            {
+                switch (section.LocalName)
+                {
+                    // Text 
+                    case "t":
+                        PlainTextInWord.Append(section.InnerText);
+                        break;
+
+
+                    case "cr":                          // Carriage return 
+                    case "br":                          // Page break 
+                        PlainTextInWord.Append(Environment.NewLine);
+                        break;
+
+
+                    // Tab 
+                    case "tab":
+                        PlainTextInWord.Append("\t");
+                        break;
+
+
+                    // Paragraph 
+                    case "p":
+                        PlainTextInWord.Append(GetPlainText(section));
+                        PlainTextInWord.AppendLine(Environment.NewLine);
+                        break;
+
+
+                    default:
+                        PlainTextInWord.Append(GetPlainText(section));
+                        break;
+                }
+            }
+
+
+            return PlainTextInWord.ToString();
+        }
+
+        /// <summary> 
+        ///  Read Word Document 
+        /// </summary> 
+        /// <returns>Plain Text in document </returns> 
+        public string ReadWordDocument(OpenXmlElement body)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(GetPlainText(body));
+            return sb.ToString();
+        }
+
+
+        private void matchInfo(string element, string text)
+        {
+            string expr = element + Environment.NewLine + Environment.NewLine + "(.*)" + Environment.NewLine;
+            string value = Regex.Match(text, expr,RegexOptions.Multiline).Groups[1].Value;
+            dict.Add(element, value);
+        }
     }
 }
